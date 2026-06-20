@@ -15,6 +15,7 @@ interface VirtualMissionSimulatorProps {
 export default function VirtualMissionSimulator({ initialTarget, onClose, onCompleted }: VirtualMissionSimulatorProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const canvasContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Targets: default to Mars or Moon if target doesn't fit standard landing
   const [selectedDest, setSelectedDest] = useState<string>(
@@ -85,9 +86,10 @@ export default function VirtualMissionSimulator({ initialTarget, onClose, onComp
   useEffect(() => {
     const handleResize = () => {
       const canvas = canvasRef.current;
-      if (!canvas || !containerRef.current) return;
-      canvas.width = containerRef.current.clientWidth;
-      canvas.height = Math.min(420, containerRef.current.clientHeight);
+      const container = canvasContainerRef.current;
+      if (!canvas || !container) return;
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
     };
 
     handleResize();
@@ -405,33 +407,52 @@ export default function VirtualMissionSimulator({ initialTarget, onClose, onComp
           <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 gap-1 my-4">
             <button
               onClick={() => setSelectedDest("moon")}
-              className={`flex-1 py-2 rounded-lg text-[11px] font-label transition-all uppercase ${
+              className={`flex-1 py-2 rounded-lg text-[10px] sm:text-[11px] font-label transition-all uppercase font-semibold ${
                 selectedDest === "moon" ? "bg-primary text-on-primary font-bold shadow-lg" : "text-on-surface-variant hover:text-white"
               }`}
             >
-              Moon (Low Gravity)
+              <span className="sm:hidden">Moon</span>
+              <span className="hidden sm:inline">Moon (Low Gravity)</span>
             </button>
             <button
               onClick={() => setSelectedDest("mars")}
-              className={`flex-1 py-2 rounded-lg text-[11px] font-label transition-all uppercase ${
+              className={`flex-1 py-2 rounded-lg text-[10px] sm:text-[11px] font-label transition-all uppercase font-semibold ${
                 selectedDest === "mars" ? "bg-primary text-on-primary font-bold shadow-lg" : "text-on-surface-variant hover:text-white"
               }`}
             >
-              Mars (Standard)
+              <span className="sm:hidden">Mars</span>
+              <span className="hidden sm:inline">Mars (Standard)</span>
             </button>
             <button
               onClick={() => setSelectedDest("jupiter")}
-              className={`flex-1 py-2 rounded-lg text-[11px] font-label transition-all uppercase ${
+              className={`flex-1 py-2 rounded-lg text-[10px] sm:text-[11px] font-label transition-all uppercase font-semibold ${
                 selectedDest === "jupiter" ? "bg-primary text-on-primary font-bold shadow-lg" : "text-on-surface-variant hover:text-white"
               }`}
             >
-              Jupiter (Stormy/Heavy)
+              <span className="sm:hidden">Jupiter</span>
+              <span className="hidden sm:inline">Jupiter (Stormy/Heavy)</span>
             </button>
           </div>
 
           {/* Simulator canvas boundary box */}
-          <div className="relative w-full h-[280px] bg-[#05060b] rounded-2xl border border-white/10 overflow-hidden">
+          <div className="relative w-full h-[240px] md:h-[280px] bg-[#05060b] rounded-2xl border border-white/10 overflow-hidden" ref={canvasContainerRef}>
             <canvas ref={canvasRef} className="block w-full h-full" />
+
+            {/* Mobile/Tablet Telemetry HUD Overlay */}
+            <div className="absolute top-3 right-3 bg-slate-950/85 backdrop-blur-sm px-3 py-2 rounded-xl border border-white/10 text-[10px] font-mono space-y-1 z-10 md:hidden pointer-events-none select-none">
+              <div className="flex gap-3 justify-between">
+                <span className="text-white/60">FUEL:</span>
+                <span className={`font-bold ${fuel < 25 ? "text-red-400 animate-pulse" : "text-primary"}`}>{fuel}%</span>
+              </div>
+              <div className="flex gap-3 justify-between">
+                <span className="text-white/60">VSPEED:</span>
+                <span className={`font-bold ${Math.abs(vSpeed) >= 5.0 ? "text-red-400 animate-pulse" : "text-green-400"}`}>{vSpeed} m/s</span>
+              </div>
+              <div className="flex gap-3 justify-between">
+                <span className="text-white/60">ALTITUDE:</span>
+                <span className="text-white font-bold">{altitude} m</span>
+              </div>
+            </div>
 
             {/* Crash or Success HUD banner overlays inside canvas */}
             {simResult === "landing_safe" && (

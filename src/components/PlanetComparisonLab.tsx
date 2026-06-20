@@ -40,8 +40,8 @@ export default function PlanetComparisonLab() {
   };
 
   return (
-    <div className="glass-panel p-8 md:p-12 rounded-[36px] border border-white/10 shadow-[0_15px_50px_-15px_rgba(0,0,0,0.8)]" id="compare">
-      <div className="grid lg:grid-cols-12 gap-12 items-center">
+    <div className="glass-panel p-5 sm:p-8 md:p-12 rounded-[36px] border border-white/10 shadow-[0_15px_50px_-15px_rgba(0,0,0,0.8)]" id="compare">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         
         {/* Left Segment: Interactive Dropdown Controls */}
         <div className="lg:col-span-5 space-y-8">

@@ -21,6 +21,8 @@ export default function App() {
   // Navigation scrolling states
   const [activeTab, setActiveTab] = useState<string>("explorer");
   const [headerScrolled, setHeaderScrolled] = useState<boolean>(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
+  const [quizModeSelector, setQuizModeSelector] = useState<{ quiz: Quiz } | null>(null);
 
   // Active game indicators (persisted locally across browser sessions!)
   const [userXp, setUserXp] = useState<number>(() => {
@@ -99,6 +101,10 @@ export default function App() {
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+  };
+
+  const handleQuizCardClick = (quiz: Quiz) => {
+    setQuizModeSelector({ quiz });
   };
 
   // Callback completed quizzes
@@ -266,11 +272,11 @@ export default function App() {
           
           {/* Logo element */}
           <div 
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="font-headline text-lg md:text-xl font-bold text-primary tracking-tighter cursor-pointer flex items-center gap-3 transition-transform hover:scale-[1.02] active:scale-95"
+            onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); setMobileMenuOpen(false); }}
+            className="font-headline text-lg md:text-xl font-bold text-primary tracking-tighter cursor-pointer flex items-center gap-2 sm:gap-3 transition-transform hover:scale-[1.02] active:scale-95"
           >
-            <CosmosLogo size={42} showText={false} />
-            <span className="bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent font-extrabold uppercase">COSMOS EXPLORERS</span>
+            <CosmosLogo size={36} showText={false} className="w-8 h-8 sm:w-10 sm:h-10" />
+            <span className="bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent font-extrabold uppercase hidden sm:inline text-sm sm:text-base md:text-lg">COSMOS EXPLORERS</span>
           </div>
 
           {/* Navigation link structures */}
@@ -310,7 +316,7 @@ export default function App() {
           </nav>
 
           {/* Utilities sidebar launcher buttons */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             
             {/* Interactive Launch Mission button */}
             <button 
@@ -326,7 +332,7 @@ export default function App() {
             {/* Audio syntheiser toggle */}
             <button
               onClick={() => setSoundEnabled((prev) => !prev)}
-              className={`p-2 rounded-xl border transition-all ${soundEnabled ? "bg-white/5 border-white/10 text-primary" : "bg-transparent border-white/5 text-white/30"}`}
+              className={`p-1.5 sm:p-2 rounded-xl border transition-all ${soundEnabled ? "bg-white/5 border-white/10 text-primary" : "bg-transparent border-white/5 text-white/30"}`}
               title={soundEnabled ? "Mute diagnostics synthesizer" : "Enable diagnostics audio synthesizer"}
             >
               {soundEnabled ? "🔊" : "🔇"}
@@ -336,7 +342,7 @@ export default function App() {
             <div className="relative">
               <button 
                 onClick={() => setShowNotificationFeed((prev) => !prev)}
-                className="p-2 rounded-xl bg-white/5 border border-white/10 text-primary hover:bg-white/10 transition-all flex items-center justify-center cursor-pointer"
+                className="p-1.5 sm:p-2 rounded-xl bg-white/5 border border-white/10 text-primary hover:bg-white/10 transition-all flex items-center justify-center cursor-pointer"
                 title="System Notifications Feed"
               >
                 <span>🔔</span>
@@ -345,7 +351,7 @@ export default function App() {
 
               {/* Notification feed overlay pop-over */}
               {showNotificationFeed && (
-                <div className="absolute right-0 mt-3 w-80 bg-slate-950/95 backdrop-blur-2xl border border-white/15 rounded-2xl p-4 shadow-2xl z-50 animate-fade-in space-y-3">
+                <div className="absolute right-0 mt-3 w-72 sm:w-80 bg-slate-950/95 backdrop-blur-2xl border border-white/15 rounded-2xl p-4 shadow-2xl z-50 animate-fade-in space-y-3">
                   <div className="flex justify-between items-center border-b border-white/10 pb-2">
                     <span className="text-[10px] font-label text-primary uppercase tracking-widest font-bold">Orbital Signals Feed</span>
                     <button onClick={() => setShowNotificationFeed(false)} className="text-[10px] text-white/50 hover:text-white">Close</button>
@@ -363,18 +369,70 @@ export default function App() {
             </div>
 
             {/* Profile XP dashboard badge */}
-            <div className="flex items-center gap-2 bg-gradient-to-r from-secondary/10 to-transparent border border-secondary/20 px-3 py-1.5 rounded-xl">
-              <span className="text-secondary select-none">🎖️</span>
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-secondary/10 to-transparent border border-secondary/20 px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl">
+              <span className="text-secondary select-none text-xs sm:text-sm">🎖️</span>
               <div className="text-left leading-none">
-                <div className="text-[8px] font-label text-secondary uppercase tracking-widest font-bold">XP rating</div>
-                <div className="text-xs font-mono font-bold text-white">{userXp} XP</div>
+                <div className="text-[8px] font-label text-secondary uppercase tracking-widest font-bold hidden xs:block">XP rating</div>
+                <div className="text-[10px] sm:text-xs font-mono font-bold text-white">{userXp} XP</div>
               </div>
             </div>
+
+            {/* Mobile burger navigation toggle */}
+            <button 
+              onClick={() => setMobileMenuOpen(prev => !prev)}
+              className="flex md:hidden p-1.5 sm:p-2 rounded-xl bg-white/5 border border-white/10 text-primary hover:bg-white/10 transition-all items-center justify-center cursor-pointer text-sm sm:text-base font-bold"
+              title="Open Navigation Menu"
+            >
+              <span>{mobileMenuOpen ? "✕" : "☰"}</span>
+            </button>
 
           </div>
 
         </div>
       </header>
+
+      {/* Mobile Glassmorphic Navigation Drawer */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 top-[65px] z-40 md:hidden bg-slate-950/95 backdrop-blur-3xl animate-fade-in flex flex-col p-6 space-y-6 border-t border-white/5">
+          <nav className="flex flex-col gap-5 text-center pt-8">
+            <button
+              onClick={() => { handleScrollToSegment("missions"); setMobileMenuOpen(false); }}
+              className="text-sm font-label uppercase tracking-widest text-on-surface-variant hover:text-white py-3 border-b border-white/5"
+            >
+              Missions
+            </button>
+            <button
+              onClick={() => { handleScrollToSegment("explorer"); setMobileMenuOpen(false); }}
+              className="text-sm font-label uppercase tracking-widest text-on-surface-variant hover:text-white py-3 border-b border-white/5"
+            >
+              Explorer
+            </button>
+            <button
+              onClick={() => { handleScrollToSegment("compare"); setMobileMenuOpen(false); }}
+              className="text-sm font-label uppercase tracking-widest text-on-surface-variant hover:text-white py-3 border-b border-white/5"
+            >
+              Compare
+            </button>
+            <button
+              onClick={() => { handleScrollToSegment("quiz"); setMobileMenuOpen(false); }}
+              className="text-sm font-label uppercase tracking-widest text-on-surface-variant hover:text-white py-3 border-b border-white/5"
+            >
+              Quiz
+            </button>
+          </nav>
+          
+          <button 
+            onClick={() => {
+              setSimulatorInitialTarget(null);
+              setShowSimulator(true);
+              setMobileMenuOpen(false);
+            }}
+            className="w-full bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary transition-all duration-300 font-label text-xs uppercase tracking-widest py-3 rounded-full font-bold shadow-[0_0_15px_rgba(106,137,255,0.4)] cursor-pointer text-center"
+          >
+            Launch VR Mission
+          </button>
+        </div>
+      )}
 
       {/* Hero Interactive Space Section */}
       <section className="relative min-h-screen flex items-center justify-center pt-28 pb-16 overflow-hidden px-6">
@@ -551,12 +609,12 @@ export default function App() {
           </div>
 
           {/* Grid list elements */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
             {filteredBodies.map((planet) => (
               <button
                 key={planet.id}
                 onClick={() => setSelectedPlanet(planet)}
-                className="glass-panel p-5 rounded-[30px] glass-card-hover text-left flex flex-col justify-between h-[360px] group relative focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                className="glass-panel p-3 sm:p-5 rounded-[20px] sm:rounded-[30px] glass-card-hover text-left flex flex-col justify-between min-h-[320px] sm:h-[360px] group relative focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
               >
                 
                 {/* Visual Image Canopy */}
@@ -707,14 +765,18 @@ export default function App() {
               </div>
 
               {QUIZZES.map((quiz) => (
-                <div key={quiz.id} className="glass-panel p-8 rounded-3xl relative overflow-hidden group hover:border-primary/30 transition-all flex flex-col justify-between min-h-[240px]">
+                <button
+                  key={quiz.id}
+                  onClick={() => handleQuizCardClick(quiz)}
+                  className="glass-panel p-6 sm:p-8 rounded-3xl relative overflow-hidden group hover:border-primary/30 transition-all flex flex-col justify-between min-h-[240px] text-left w-full focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                >
                   {/* Faint graphics in background */}
-                  <div className="absolute right-0 bottom-0 opacity-[0.02] group-hover:opacity-[0.08] transition-opacity text-[100px] font-bold">
+                  <div className="absolute right-0 bottom-0 opacity-[0.02] group-hover:opacity-[0.08] transition-opacity text-[100px] font-bold select-none pointer-events-none">
                     {quiz.icon}
                   </div>
 
-                  <div>
-                    <div className="flex justify-between items-start">
+                  <div className="w-full">
+                    <div className="flex justify-between items-start w-full">
                       <span className="text-3xl">{quiz.icon}</span>
                       <span className={`text-[9px] font-label uppercase px-2.5 py-0.5 rounded ${
                         quiz.level === "Novice" ? "bg-green-500/20 text-green-300" : "bg-primary/20 text-primary"
@@ -723,22 +785,21 @@ export default function App() {
                       </span>
                     </div>
 
-                    <h3 className="font-headline text-lg sm:text-xl text-white mt-4 font-bold">{quiz.title}</h3>
+                    <h3 className="font-headline text-lg sm:text-xl text-white mt-4 font-bold group-hover:text-primary transition-colors">{quiz.title}</h3>
                     <p className="text-xs text-on-surface-variant mt-2 leading-relaxed">
                       {quiz.subtitle}
                     </p>
                   </div>
 
-                  <div className="flex justify-between items-center pt-6 mt-4 border-t border-white/5">
+                  <div className="flex justify-between items-center pt-6 mt-4 border-t border-white/5 w-full">
                     <span className="text-xs font-mono text-secondary">+{quiz.xpReward} XP Reward</span>
-                    <button
-                      onClick={() => setActiveQuiz(quiz)}
-                      className="px-4 py-2 bg-primary/10 hover:bg-primary text-primary hover:text-on-primary transition-all font-label text-xs uppercase tracking-wider rounded-xl font-bold cursor-pointer"
+                    <div
+                      className="px-4 py-2 bg-primary/10 group-hover:bg-primary group-hover:text-on-primary text-primary transition-all font-label text-xs uppercase tracking-wider rounded-xl font-bold"
                     >
-                      Start Quiz
-                    </button>
+                      Calibrate Quiz
+                    </div>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
 
@@ -783,7 +844,7 @@ export default function App() {
           <div className="relative glass-panel w-full max-w-4xl max-h-[92%] overflow-hidden rounded-[36px] flex flex-col md:flex-row shadow-[0_0_80px_rgba(0,0,0,0.8)]">
             
             {/* Left part: Aesthetic Planet Sphere Showcase */}
-            <div className="md:w-1/2 p-8 md:p-12 bg-white/[0.02] flex flex-col justify-center items-center relative overflow-hidden border-b md:border-b-0 md:border-r border-white/10">
+            <div className="md:w-1/2 p-6 md:p-12 bg-white/[0.02] flex flex-col justify-center items-center relative overflow-hidden border-b md:border-b-0 md:border-r border-white/10 shrink-0">
               <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
               
               {/* Floating planetary category badge */}
@@ -794,13 +855,13 @@ export default function App() {
               {/* Close button for tiny displays */}
               <button 
                 onClick={() => setSelectedPlanet(null)} 
-                className="md:hidden absolute top-4 right-4 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white"
+                className="md:hidden absolute top-4 right-4 w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white cursor-pointer hover:bg-white/10"
               >
                 ✕
               </button>
 
               {/* Sphere image canopy */}
-              <div className="w-64 h-64 md:w-72 md:h-72 my-6 rounded-full relative z-10 flex items-center justify-center">
+              <div className="w-36 h-36 sm:w-48 sm:h-48 md:w-72 md:h-72 my-4 md:my-6 rounded-full relative z-10 flex items-center justify-center">
                 {/* Simulated colorful atmospheric orbit rings behind */}
                 <div className={`absolute w-full h-full rounded-full opacity-35 blur-2xl ${
                   selectedPlanet.category === "Star" ? "bg-amber-400" : selectedPlanet.category === "Rocky" ? "bg-red-500" : "bg-primary"
@@ -814,12 +875,12 @@ export default function App() {
               </div>
 
               {/* Name indicator */}
-              <h2 className="font-headline text-3xl md:text-4xl text-white relative z-10 text-center">{selectedPlanet.name}</h2>
-              <p className="text-xs text-on-surface-variant italic mt-1 relative z-10 text-center max-w-sm">{selectedPlanet.funFact}</p>
+              <h2 className="font-headline text-2xl md:text-4xl text-white relative z-10 text-center">{selectedPlanet.name}</h2>
+              <p className="text-[11px] sm:text-xs text-on-surface-variant italic mt-1 relative z-10 text-center max-w-sm">{selectedPlanet.funFact}</p>
             </div>
 
             {/* Right part: Detailed Spec lists and compos charts */}
-            <div className="md:w-1/2 p-8 md:p-12 overflow-y-auto no-scrollbar space-y-8">
+            <div className="md:w-1/2 p-6 md:p-12 overflow-y-auto no-scrollbar space-y-6 md:space-y-8">
               
               {/* Header section with category overview */}
               <div className="flex justify-between items-start">
@@ -930,6 +991,73 @@ export default function App() {
         />
       )}
 
+      {/* Calibration Mode Selection Modal */}
+      {quizModeSelector && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/90 backdrop-blur-2xl" onClick={() => setQuizModeSelector(null)}></div>
+          
+          <div className="relative glass-panel w-full max-w-md rounded-[32px] overflow-hidden shadow-[0_0_80px_rgba(99,102,241,0.2)] border border-white/10 p-6 md:p-8 space-y-6">
+            <div className="flex justify-between items-center border-b border-white/10 pb-4">
+              <div>
+                <span className="text-[10px] font-label text-primary tracking-widest uppercase bg-primary/25 px-2.5 py-0.5 rounded-full font-bold">
+                  CALIBRATION INTERFACE
+                </span>
+                <h3 className="font-headline text-lg text-white mt-2 font-bold">{quizModeSelector.quiz.title}</h3>
+              </div>
+              <button 
+                onClick={() => setQuizModeSelector(null)}
+                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 text-white transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-on-surface-variant leading-relaxed">
+              Select your academic calibration channel. Run standard preset coordinates or let the Neural Tutor generate a personalized test.
+            </p>
+
+            <div className="space-y-3">
+              {/* Option 1: Standard Preset */}
+              <button
+                onClick={() => {
+                  setActiveQuiz(quizModeSelector.quiz);
+                  setQuizModeSelector(null);
+                }}
+                className="w-full text-left p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-primary/40 transition-all flex items-start gap-3 cursor-pointer group"
+              >
+                <span className="text-2xl group-hover:scale-110 transition-transform select-none pointer-events-none">🪐</span>
+                <div className="space-y-1">
+                  <div className="text-xs font-label text-white font-bold group-hover:text-primary transition-colors">Standard Academy Calibration</div>
+                  <p className="text-[10px] text-on-surface-variant leading-normal">Verify coordinate indices and telemetry metrics predefined by the Academy.</p>
+                </div>
+              </button>
+
+              {/* Option 2: AI Neural Calibrator */}
+              <button
+                onClick={() => {
+                  const quizId = quizModeSelector.quiz.id;
+                  let aiTopic = "All Solar System Worlds (General Core)";
+                  if (quizId === "quiz_01") aiTopic = "Colossal Gas Giants Exploration";
+                  if (quizId === "quiz_02") aiTopic = "Rocky Specimen Focus (Inner Worlds)";
+                  if (quizId === "quiz_03") aiTopic = "Cosmic Mysteries & Telemetry (Missions & Kuiper Belt)";
+                  
+                  setAiFocusTopic(aiTopic);
+                  setQuizModeSelector(null);
+                  setShowAiSetup(true);
+                }}
+                className="w-full text-left p-4 rounded-2xl bg-gradient-to-r from-indigo-500/10 to-indigo-600/5 hover:from-indigo-500/20 border border-indigo-500/20 hover:border-indigo-500/55 transition-all flex items-start gap-3 cursor-pointer group"
+              >
+                <span className="text-2xl animate-pulse select-none pointer-events-none">🧠</span>
+                <div className="space-y-1">
+                  <div className="text-xs font-label text-indigo-300 font-bold group-hover:text-indigo-200 transition-colors">Gemini Neural AI Tutor</div>
+                  <p className="text-[10px] text-indigo-200/60 leading-normal">Generate dynamic challenges customized with your recent telemetry comparison logs.</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* AI Wizard Setup Overlay */}
       {showAiSetup && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
@@ -964,12 +1092,13 @@ export default function App() {
                   {/* Select Core Topic */}
                   <div className="space-y-2">
                     <label className="block text-xs font-label text-primary uppercase tracking-widest font-bold">Astronomy Focus Field</label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {[
                         "All Solar System Worlds (General Core)",
                         "Rocky Specimen Focus (Inner Worlds)",
                         "Colossal Gas Giants Exploration",
                         "The Central Reactor (Sun Energetics)",
+                        "Cosmic Mysteries & Telemetry (Missions & Kuiper Belt)",
                         "Custom Focus"
                       ].map((val) => (
                         <button

@@ -29,6 +29,13 @@ export default function SolarSystemCanvas({ onSelectPlanet }: SolarSystemCanvasP
   const [hoveredPlanet, setHoveredPlanet] = useState<PlanetRenderConfig | null>(null);
   const [showOrbitLines, setShowOrbitLines] = useState<boolean>(true);
   const [zoom, setZoom] = useState<number>(1);
+  const [hudCollapsed, setHudCollapsed] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (window.innerWidth >= 768) {
+      setHudCollapsed(false);
+    }
+  }, []);
 
   // Define scale renders
   // We place orbits sequentially for visual clarity (not strictly linear scale to avoid spacing out Uranus too far)
@@ -99,6 +106,9 @@ export default function SolarSystemCanvas({ onSelectPlanet }: SolarSystemCanvasP
       const centerX = w / 2;
       const centerY = h / 2;
 
+      // Calculate responsive orbit scale dynamically
+      const responsiveScale = w < 768 ? Math.max(0.42, w / 920) : 1.0;
+
       // Clear with radial cosmic overlay
       ctx.fillStyle = "#02040a";
       ctx.fillRect(0, 0, w, h);
@@ -129,7 +139,9 @@ export default function SolarSystemCanvas({ onSelectPlanet }: SolarSystemCanvasP
 
       // Draw Sun in the middle
       ctx.save();
-      const sunGlow = ctx.createRadialGradient(centerX, centerY, 5 * zoom, centerX, centerY, 40 * zoom);
+      const sunBaseRadius = w < 768 ? 10 : 15;
+      const sunBaseGlow = w < 768 ? 25 : 40;
+      const sunGlow = ctx.createRadialGradient(centerX, centerY, 5 * zoom, centerX, centerY, sunBaseGlow * zoom);
       sunGlow.addColorStop(0, "rgba(254, 203, 0, 1)");
       sunGlow.addColorStop(0.3, "rgba(249, 115, 22, 0.8)");
       sunGlow.addColorStop(0.7, "rgba(239, 68, 68, 0.35)");
@@ -137,13 +149,13 @@ export default function SolarSystemCanvas({ onSelectPlanet }: SolarSystemCanvasP
 
       ctx.fillStyle = sunGlow;
       ctx.beginPath();
-      ctx.arc(centerX, centerY, 40 * zoom, 0, Math.PI * 2);
+      ctx.arc(centerX, centerY, sunBaseGlow * zoom, 0, Math.PI * 2);
       ctx.fill();
 
       // Sun Core Solid
       ctx.fillStyle = "#ffdd55";
       ctx.beginPath();
-      ctx.arc(centerX, centerY, 15 * zoom, 0, Math.PI * 2);
+      ctx.arc(centerX, centerY, sunBaseRadius * zoom, 0, Math.PI * 2);
       ctx.fill();
 
       // Sun flares sparkle effect
@@ -153,7 +165,7 @@ export default function SolarSystemCanvas({ onSelectPlanet }: SolarSystemCanvasP
 
       for (let i = 0; i < 8; i++) {
         const flareAngle = (i * Math.PI) / 4 + localAngleIncrement;
-        const flareLength = (20 + Math.sin(localAngleIncrement * 10 + i) * 6) * zoom;
+        const flareLength = ((w < 768 ? 14 : 20) + Math.sin(localAngleIncrement * 10 + i) * 6) * zoom;
         const fx = centerX + Math.cos(flareAngle) * flareLength;
         const fy = centerY + Math.sin(flareAngle) * flareLength;
         ctx.beginPath();
@@ -170,7 +182,7 @@ export default function SolarSystemCanvas({ onSelectPlanet }: SolarSystemCanvasP
           planet.angle += planet.orbitalSpeed * simSpeed * 0.45;
         }
 
-        const scaledOrbitRadius = planet.orbitRadius * zoom * (0.6 + zoom * 0.1);
+        const scaledOrbitRadius = planet.orbitRadius * zoom * responsiveScale * (0.6 + zoom * 0.1);
 
         // Draw orbital trail path
         if (showOrbitLines) {
@@ -188,11 +200,11 @@ export default function SolarSystemCanvas({ onSelectPlanet }: SolarSystemCanvasP
         // Pre-save coords for click actions
         (planet as any).renderX = px;
         (planet as any).renderY = py;
-        (planet as any).scaledRadius = planet.radius * Math.max(0.6, zoom);
+        (planet as any).scaledRadius = planet.radius * Math.max(0.6, zoom) * (w < 768 ? 0.75 : 1.0);
 
         // Draw Orbiting Earth's moon!
         if (planet.id === "earth") {
-          const moonOrbitDist = 18 * Math.max(0.7, zoom);
+          const moonOrbitDist = (w < 768 ? 12 : 18) * Math.max(0.7, zoom);
           const moonAngle = planet.angle * 4 + localAngleIncrement * 2;
           const mx = px + Math.cos(moonAngle) * moonOrbitDist;
           const my = py + Math.sin(moonAngle) * moonOrbitDist;
@@ -208,7 +220,7 @@ export default function SolarSystemCanvas({ onSelectPlanet }: SolarSystemCanvasP
           // Moon Sphere
           ctx.fillStyle = "#8a90a0";
           ctx.beginPath();
-          ctx.arc(mx, my, 2.5 * Math.max(0.7, zoom), 0, Math.PI * 2);
+          ctx.arc(mx, my, (w < 768 ? 1.8 : 2.5) * Math.max(0.7, zoom), 0, Math.PI * 2);
           ctx.fill();
         }
 
@@ -220,16 +232,16 @@ export default function SolarSystemCanvas({ onSelectPlanet }: SolarSystemCanvasP
 
           // Rings
           ctx.strokeStyle = "rgba(240, 200, 100, 0.5)";
-          ctx.lineWidth = 4 * Math.max(0.7, zoom);
+          ctx.lineWidth = (w < 768 ? 2.5 : 4) * Math.max(0.7, zoom);
           ctx.beginPath();
-          ctx.ellipse(0, 0, planet.radius * 2 * Math.max(0.7, zoom), planet.radius * 0.7 * Math.max(0.7, zoom), 0, 0, Math.PI * 2);
+          ctx.ellipse(0, 0, planet.radius * 2 * Math.max(0.7, zoom) * (w < 768 ? 0.75 : 1.0), planet.radius * 0.7 * Math.max(0.7, zoom) * (w < 768 ? 0.75 : 1.0), 0, 0, Math.PI * 2);
           ctx.stroke();
           ctx.restore();
         }
 
         // Draw Planet Body Sphere
         ctx.save();
-        const planetRad = planet.radius * Math.max(0.65, zoom);
+        const planetRad = planet.radius * Math.max(0.65, zoom) * (w < 768 ? 0.75 : 1.0);
 
         // Gradient depth
         const depthGrad = ctx.createRadialGradient(px - planetRad * 0.3, py - planetRad * 0.3, planetRad * 0.1, px, py, planetRad);
@@ -244,7 +256,7 @@ export default function SolarSystemCanvas({ onSelectPlanet }: SolarSystemCanvasP
 
         // Subtle glow glow outline
         ctx.shadowColor = planet.color;
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = w < 768 ? 6 : 10;
         ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
         ctx.lineWidth = 0.5;
         ctx.stroke();
@@ -351,23 +363,30 @@ export default function SolarSystemCanvas({ onSelectPlanet }: SolarSystemCanvasP
   };
 
   return (
-    <div className="relative w-full h-[520px] md:h-[620px] rounded-[36px] overflow-hidden glass-panel border border-white/10" ref={containerRef}>
+    <div className="relative w-full h-[400px] sm:h-[500px] md:h-[620px] rounded-[36px] overflow-hidden glass-panel border border-white/10" ref={containerRef}>
       
       {/* Simulation Command HUD panel overlay */}
-      <div className="absolute top-6 left-6 z-10 flex flex-col gap-3 max-w-sm pointer-events-auto">
-        <div className="bg-slate-950/70 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
-          <h4 className="text-xs font-label text-primary tracking-widest uppercase mb-1">Telemetry Sensor</h4>
-          <p className="text-[13px] text-on-surface-variant leading-tight">
-            Left-click on any orbiting orbital body or the central Sun core to trigger detailed spectral analysis and core mapping.
-          </p>
+      <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-10 flex flex-col gap-2 max-w-[280px] sm:max-w-sm pointer-events-auto">
+        <div className="bg-slate-950/85 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
+          <div className="flex justify-between items-center cursor-pointer" onClick={() => setHudCollapsed(prev => !prev)}>
+            <h4 className="text-xs font-label text-primary tracking-widest uppercase flex items-center gap-1.5 select-none font-bold">
+              <span>📡</span> Telemetry Sensor
+            </h4>
+            <span className="text-[10px] text-primary/70">{hudCollapsed ? "▼ Info" : "▲ Hide"}</span>
+          </div>
+          {!hudCollapsed && (
+            <p className="text-[11px] sm:text-[13px] text-on-surface-variant leading-tight mt-2 animate-fade-in">
+              Left-click on any orbiting orbital body or the central Sun core to trigger detailed spectral analysis and core mapping.
+            </p>
+          )}
         </div>
 
         {/* Orbit configuration buttons */}
-        <div className="bg-slate-950/70 backdrop-blur-md p-3 rounded-2xl border border-white/10 flex flex-wrap gap-2">
+        <div className="bg-slate-950/85 backdrop-blur-md p-2 sm:p-3 rounded-2xl border border-white/10 flex flex-wrap gap-2">
           <button
             onClick={() => setShowOrbitLines((prev) => !prev)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-label transition-all ${
-              showOrbitLines ? "bg-primary/20 text-primary border border-primary/30" : "bg-white/5 text-on-surface-variant hover:text-white"
+            className={`px-2.5 py-1.5 rounded-lg text-[10px] sm:text-xs font-label transition-all ${
+              showOrbitLines ? "bg-primary/20 text-primary border border-primary/30 font-bold" : "bg-white/5 text-on-surface-variant hover:text-white"
             }`}
           >
             {showOrbitLines ? "Hide Orbits" : "Show Orbits"}
@@ -375,7 +394,7 @@ export default function SolarSystemCanvas({ onSelectPlanet }: SolarSystemCanvasP
           
           <button
             onClick={() => setZoom((prev) => (prev === 1.2 ? 0.7 : prev === 0.7 ? 1.0 : 1.2))}
-            className="px-3 py-1.5 rounded-lg text-xs font-label bg-white/5 text-on-surface-variant hover:text-white transition-all border border-transparent hover:border-white/10"
+            className="px-2.5 py-1.5 rounded-lg text-[10px] sm:text-xs font-label bg-white/5 text-on-surface-variant hover:text-white transition-all border border-transparent hover:border-white/10"
           >
             Scale: {zoom === 1.2 ? "120%" : zoom === 0.7 ? "70%" : "100%"}
           </button>
@@ -383,8 +402,8 @@ export default function SolarSystemCanvas({ onSelectPlanet }: SolarSystemCanvasP
       </div>
 
       {/* Speed Warp control overlay (Bottom center-right) */}
-      <div className="absolute bottom-6 right-6 z-10 bg-slate-950/80 backdrop-blur-md p-3 rounded-2xl border border-white/10 shadow-lg flex items-center gap-4">
-        <span className="text-[10px] font-label text-primary tracking-wider uppercase">ORBIT WARP INDEX :</span>
+      <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 z-10 bg-slate-950/85 backdrop-blur-md p-2 sm:p-3 rounded-2xl border border-white/10 shadow-lg flex items-center gap-3 sm:gap-4">
+        <span className="text-[9px] sm:text-[10px] font-label text-primary tracking-wider uppercase font-bold hidden xs:inline">WARP:</span>
         <div className="flex items-center gap-1.5">
           {[
             { label: "PAUSE", val: 0 },
@@ -395,7 +414,7 @@ export default function SolarSystemCanvas({ onSelectPlanet }: SolarSystemCanvasP
             <button
               key={sp.label}
               onClick={() => setSimSpeed(sp.val)}
-              className={`px-2.5 py-1 rounded-lg text-[10px] font-label transition-all ${
+              className={`px-2 py-1 sm:px-2.5 sm:py-1 rounded-lg text-[9px] sm:text-[10px] font-label transition-all ${
                 simSpeed === sp.val ? "bg-primary text-on-primary font-bold shadow-md" : "bg-white/5 text-on-surface-variant hover:bg-white/10"
               }`}
             >
@@ -416,18 +435,18 @@ export default function SolarSystemCanvas({ onSelectPlanet }: SolarSystemCanvasP
 
       {/* Hover telemetry telemetry details */}
       {hoveredPlanet && (
-        <div className="absolute bottom-6 left-6 z-10 bg-slate-950/95 backdrop-blur-md p-4 rounded-2xl border border-white/20 shadow-2xl max-w-xs animate-fade-in">
+        <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 z-10 bg-slate-950/95 backdrop-blur-md p-3 sm:p-4 rounded-2xl border border-white/20 shadow-2xl max-w-[240px] sm:max-w-xs animate-fade-in">
           <div className="flex items-center gap-2 mb-1">
             <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: hoveredPlanet.color }}></span>
-            <h5 className="font-label text-sm text-white">{hoveredPlanet.name}</h5>
+            <h5 className="font-label text-xs sm:text-sm text-white font-bold">{hoveredPlanet.name}</h5>
           </div>
-          <p className="text-[11px] text-on-surface-variant font-mono">
-            Radar Angle: {(hoveredPlanet.angle % (Math.PI * 2)).toFixed(2)} rad <br />
-            Distance Orbit: {hoveredPlanet.orbitRadius * 1.49} M.km equivalent <br />
-            Velocity Warp: {(hoveredPlanet.orbitalSpeed * 1000).toFixed(1)} km/s relative
+          <p className="text-[10px] sm:text-[11px] text-on-surface-variant font-mono leading-tight">
+            Angle: {(hoveredPlanet.angle % (Math.PI * 2)).toFixed(2)} rad <br />
+            Orbit: {Math.round(hoveredPlanet.orbitRadius * 1.49)} M.km <br />
+            Speed: {(hoveredPlanet.orbitalSpeed * 1000).toFixed(1)} relative
           </p>
-          <div className="mt-2 text-[10px] text-primary font-label flex items-center gap-1">
-            <span>Spectrum locks active. Click to scan</span>
+          <div className="mt-1.5 text-[9px] sm:text-[10px] text-primary font-label flex items-center gap-1 font-bold">
+            <span>Scan Specimen</span>
             <span>✦</span>
           </div>
         </div>

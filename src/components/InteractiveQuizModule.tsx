@@ -228,7 +228,7 @@ export default function InteractiveQuizModule({
       <div className={`relative glass-panel w-full rounded-[32px] overflow-hidden shadow-[0_0_80px_rgba(183,196,255,0.2)] transition-all duration-500 ${quizFinished && isAiQuiz ? "max-w-4xl" : "max-w-2xl"}`}>
         
         {/* Banner header with quiz theme colors */}
-        <div className="bg-gradient-to-r from-primary/10 via-tertiary/10 to-transparent p-6 md:p-8 border-b border-white/10 flex justify-between items-center">
+        <div className="bg-gradient-to-r from-primary/10 via-tertiary/10 to-transparent p-5 sm:p-6 md:p-8 border-b border-white/10 flex justify-between items-center">
           <div>
             <div className="flex items-center gap-2">
               <span className="text-2xl">{quiz.icon}</span>
@@ -248,7 +248,7 @@ export default function InteractiveQuizModule({
         </div>
 
         {/* Content body showing current progress or result */}
-        <div className="p-6 md:p-8 space-y-6">
+        <div className="p-5 sm:p-6 md:p-8 space-y-4 sm:space-y-6">
           {!quizFinished ? (
             <>
               {/* Question progress bar */}
