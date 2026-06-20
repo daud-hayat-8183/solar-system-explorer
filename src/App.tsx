@@ -198,15 +198,50 @@ export default function App() {
       }, 1800);
 
     } catch (err: any) {
-      console.error(err);
+      console.warn("API Quiz generation failed, falling back to local calibration:", err);
       setGenerationLogs((prev) => [
         ...prev,
-        "✕ NEURAL TRANSMISSION RECOIL ERROR. RECONNECTING CORES...",
-        `ERROR LOGGED: ${err?.message || "Lost connection to the Gemini grid."}`,
+        "⚠️ NEURAL TRANSMISSION TIMEOUT (USING OFFLINE SPACE TUTOR)...",
+        "📂 SCANNING LOCAL ACADEMIC QUESTION BANKS...",
       ]);
+
+      // Generate a themed quiz from the static question bank
       setTimeout(() => {
-        setIsGeneratingQuiz(false);
-      }, 3000);
+        // Collect all questions from the pre-defined quizzes
+        const allStaticQuestions = QUIZZES.flatMap(q => q.questions);
+        
+        // Shuffle all questions and pick 5
+        const shuffled = [...allStaticQuestions].sort(() => 0.5 - Math.random());
+        const selectedQuestions = shuffled.slice(0, 5).map((q, idx) => ({
+          ...q,
+          id: idx + 1
+        }));
+
+        const topicName = aiFocusTopic.split(" (")[0]; // clean up e.g. "All Solar System Worlds (General Core)" -> "All Solar System Worlds"
+        const fallbackQuiz: Quiz = {
+          id: "ai_quiz",
+          title: `Offline ${topicName} Tutor`,
+          subtitle: `Telemetry calibration challenge on topic: ${topicName}`,
+          badge: `Cosmic Scholar Badge`,
+          xpReward: 800,
+          level: "Commander",
+          icon: "🧠",
+          questions: selectedQuestions,
+        };
+
+        setGenerationLogs((prev) => [
+          ...prev,
+          "✓ DECRYPTED 5 LOCAL SCIENTIFIC CHALLENGES SUCCESSFULLY",
+          "🚀 LOCAL CALIBRATION FINISHED. IGNITING PROBE MOTORS!",
+        ]);
+
+        setTimeout(() => {
+          setIsGeneratingQuiz(false);
+          setShowAiSetup(false);
+          setIsAiQuizActive(true);
+          setActiveQuiz(fallbackQuiz);
+        }, 800);
+      }, 1500);
     }
   };
 

@@ -94,8 +94,30 @@ export default function InteractiveQuizModule({
           setAiFeedback(data.feedback || "Sensors recorded perfect telemetry coordinates.");
         })
         .catch((err) => {
-          console.error("AI Feedback retrieval failed:", err);
-          setAiFeedback("System connected failed to establish neural bridge for diagnostics. Regardless, telemetry complete!");
+          console.error("AI Feedback retrieval failed, using local offline generator:", err);
+          
+          // Generate a premium offline feedback report
+          const correctCount = answersStatus.filter(Boolean).length;
+          const totalQuestions = quiz.questions.length;
+          const pct = Math.round((correctCount / totalQuestions) * 100);
+          
+          let report = `## Offline Academy Diagnostics\n\n`;
+          report += `Telemetry calibration completed with an accuracy of **${pct}%** (${correctCount}/${totalQuestions} challenges resolved).\n\n`;
+          
+          if (pct === 100) {
+            report += `### Stellar Performance Rating\nExcellent! Perfect navigation calculations. Your sensors locked onto all coordinates correctly. You have demonstrated master-level quadrant control.\n\n`;
+          } else if (pct >= 60) {
+            report += `### High Velocity Competency\nGood work! Most calibration channels are locked in. A few minor telemetry adjustments are recommended for future orbital runs.\n\n`;
+          } else {
+            report += `### Calibration Warnings\nDiagnostics show orbital drift. Core systems require checking. Review solar telemetry notes on rocky core densities and atmospheric gases.\n\n`;
+          }
+          
+          report += `### Custom Study Tips\n`;
+          report += `- **Revise Celestial Densities**: Rocky planets like Mercury feature thick metallic iron cores, while atmospheric giants lack solid bounds.\n`;
+          report += `- **Recalibrate Orbit Paths**: Re-run the orbital flight simulations to review AU scales (Astronomical Units) from the central Sun.\n`;
+          report += `- **Check Chemistry Telemetries**: Make sure to check key gas elements (hydrogen, helium, ammonia) in outer giant atmospheres.\n`;
+          
+          setAiFeedback(report);
         })
         .finally(() => {
           setIsLoadingFeedback(false);
