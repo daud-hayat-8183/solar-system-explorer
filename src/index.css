@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:ital,wght@0,400..800;1,400..800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;600;700&display=swap');
+
+@theme {
+  --color-tertiary-container: #3b82f6;
+  --color-error: #f87171;
+  --color-surface-variant: #1e293b;
+  --color-tertiary-fixed-dim: #93c5fd;
+  --color-on-secondary-fixed-variant: #451a03;
+  --color-on-surface-variant: #94a3b8;
+  --color-surface-container-lowest: #020306;
+  --color-surface-dim: #05070e;
+  --color-on-tertiary-container: #eff6ff;
+  --color-on-secondary-container: #fef3c7;
+  --color-on-primary-fixed-variant: #312e81;
+  --color-on-tertiary: #172554;
+  --color-on-surface: #f1f5f9;
+  --color-on-primary-fixed: #1e1b4b;
+  --color-surface-tint: #818cf8;
+  --color-secondary: #f59e0b;
+  --color-surface-container-highest: #1e293b;
+  --color-on-tertiary-fixed: #172554;
+  --color-secondary-fixed: #fef08a;
+  --color-inverse-primary: #4f46e5;
+  --color-primary-fixed-dim: #9933ff;
+  --color-inverse-on-surface: #0f172a;
+  --color-surface-container-low: #040612;
+  --color-inverse-surface: #f8fafc;
+  --color-primary: #818cf8;
+  --color-surface-container-high: #111827;
+  --color-surface-bright: #1f2937;
+  --color-error-container: #7f1d1d;
+  --color-on-error: #fecaca;
+  --color-secondary-fixed-dim: #eab308;
+  --color-primary-container: #4f46e5;
+  --color-on-background: #f1f5f9;
+  --color-surface-container: #080c1d;
+  --color-on-error-container: #fee2e2;
+  --color-on-primary-container: #e0e7ff;
+  --color-tertiary-fixed: #dbeafe;
+  --color-tertiary: #60a5fa;
+  --color-outline-variant: #334155;
+  --color-primary-fixed: #e0e7ff;
+  --color-on-primary: #ffffff;
+  --color-outline: #64748b;
+  --color-background: #02040a;
+  --color-on-secondary-fixed: #fbbf24;
+  --color-on-tertiary-fixed-variant: #1e3a8a;
+  --color-secondary-container: #d97706;
+  --color-on-secondary: #ffffff;
+
+  --font-headline: "Cinzel", serif;
+  --font-body: "Plus Jakarta Sans", sans-serif;
+  --font-label: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer utilities {
+  .glass-panel {
+    background: rgba(8, 12, 32, 0.45);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(129, 140, 248, 0.08);
+  }
+
+  .glass-card-hover {
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .glass-card-hover:hover {
+    background: rgba(129, 140, 248, 0.05);
+    box-shadow: 0 16px 40px -12px rgba(99, 102, 241, 0.25);
+    border-color: rgba(129, 140, 248, 0.25);
+    transform: translateY(-4px);
+  }
+
+  /* Custom planet outer glows for beautiful self-illuminating designs */
+  .glow-primary {
+    box-shadow: 0 0 35px rgba(129, 140, 248, 0.45);
+  }
+
+  .glow-secondary {
+    box-shadow: 0 0 35px rgba(245, 158, 11, 0.45);
+  }
+
+  .glow-tertiary {
+    box-shadow: 0 0 35px rgba(96, 165, 250, 0.45);
+  }
+
+  .glow-error {
+    box-shadow: 0 0 35px rgba(248, 113, 113, 0.45);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+body {
+  background-color: #02040a;
+  color: #f1f5f9;
+  font-family: var(--font-body);
+}
+
+/* Animations helper */
+@keyframes orbital-rotation {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-orbital {
+  animation: orbital-rotation 25s linear infinite;
+}
